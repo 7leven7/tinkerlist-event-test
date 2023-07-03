@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Mockery\MockInterface;
 use Tests\TestCase;
+use App\Models\User;
 
 class AuthControllerTest extends TestCase
 {
@@ -29,6 +30,11 @@ class AuthControllerTest extends TestCase
             'password' => 'password123',
         ]);
 
+        $user = new User();
+        $user->name = 'John Doe';
+        $user->email = 'john@example.com';
+        $user->password = bcrypt('password123');
+
         $userRepositoryMock->shouldReceive('create')
             ->once()
             ->with([
@@ -36,7 +42,7 @@ class AuthControllerTest extends TestCase
                 'email' => 'john@example.com',
                 'password' => 'password123',
             ])
-            ->andReturn(true);
+            ->andReturn($user);
 
         $response = $authController->register($request);
 
