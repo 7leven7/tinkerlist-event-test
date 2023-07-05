@@ -10,8 +10,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Services\EventMailService;
 use App\Services\EventWeatherService;
+use App\Services\GeocodingService;
 use Illuminate\Database\Eloquent\Collection;
 use App\Helpers\DateTimeHelper;
+use App\Helpers\PaginationHelper;
+use Illuminate\Pagination\LengthAwarePaginator;
+
 
 class EventRepository implements EventRepositoryInterface
 {
@@ -22,6 +26,7 @@ class EventRepository implements EventRepositoryInterface
             $validator = Validator::make($data, [
                 'date_time' => 'required|date',
                 'location' => 'required|string',
+                'country_code' => 'required|string',
                 'invitees' => 'required|array',
                 'invitees.*.name' => 'required|string',
                 'invitees.*.email' => 'required|email', 
@@ -33,10 +38,21 @@ class EventRepository implements EventRepositoryInterface
 
             $dateTime = $data['date_time'];
             $locationName = $data['location'];
+            $countryCode = $data['country_code'];
             $inviteesData = $data['invitees'];
             $title = $data['title'];
 
-            $location = Location::firstOrCreate(['name' => $locationName]);
+            $location = Location::where(['name' => $locationName])->first();
+            
+            if (!$location){
+                $geoService = new GeocodingService();
+                $geoData =  $geoService->getCoordinatesByCityName($locationName,$countryCode);
+                $location = Location::create([
+                    'name' => $locationName,
+                    'longitude' => $geoData[0]['longitude'],
+                    'latitude' => $geoData[0]['latitude']
+                ]);
+            }
 
             $event = Event::firstOrCreate([
                 'title' => $title,
@@ -157,34 +173,63 @@ class EventRepository implements EventRepositoryInterface
     public function getById($id): Event
     {
         try {
-            return Event::with('location', 'invitees')->findOrFail($id);
+            $event = Event::with('location', 'invitees')->findOrFail($id);
+            $event = $this->attachWeatherData($event);
+            return $event;
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), 500);
         }
     }
 
-    public function getByDateRange($data): Collection
+    public function getByDateRange($data): LengthAwarePaginator
     {
         try {
-            $events =  Event::with('location')->whereBetween('event_date_time', [$data['startDate'], $data['endDate']])->get();
-            $weatherService = new EventWeatherService();
-            foreach($events as $event){
-                $weatherData = $weatherService->getWeatherForecast($event->location->latitude,$event->location->longitude,$event->event_date_time);
-               
-                foreach ($weatherData['daily'] as $data){
-                   
-                   if(DateTimeHelper::unixToDateTime($data['dt'])['date'] == DateTimeHelper::getDateFromTimestamp($event->event_date_time)){
-                       $event->weather = $data;
-                   }
-                }
-            }
-           
-            return $events;
+            $perPage = $data['perPage'] ?? 10; 
+            $currentPage = $data['page'] ?? 1; 
+    
+            $events = $this->getEventsByDateRange($data['startDate'], $data['endDate']);
+    
+            $paginationHelper = new PaginationHelper();
+            $paginatedEvents = $paginationHelper->paginate($events, $perPage, $currentPage);
+    
+            $paginatedEvents = $this->attachWeatherData(null, $paginatedEvents);
+    
+            return $paginatedEvents;
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), 500);
         }
     }
-
+    
+    private function getEventsByDateRange(string $startDate, string $endDate): Collection
+    {
+        return Event::with('location')
+            ->whereBetween('event_date_time', [$startDate, $endDate])
+            ->get();
+    }
+    
+    private function attachWeatherData($event, $events = null): mixed
+    {
+        $weatherService = new EventWeatherService();
+        $eventData = [$event];
+    
+        if ($events !== null) {
+            $eventData = $events;
+        }
+    
+        foreach ($eventData as $eventItem) {
+            $weatherData = $weatherService->getWeatherForecast($eventItem->location->latitude, $eventItem->location->longitude, $eventItem->event_date_time);
+            
+            foreach ($weatherData['daily'] as $data) {
+                if (DateTimeHelper::unixToDateTime($data['dt'])['date'] == DateTimeHelper::getDateFromTimestamp($eventItem->event_date_time)) {
+                    $eventItem->weather = $data;
+                }
+            }
+        }
+    
+        return ($events !== null) ? $eventData : $event;
+    }
+    
+    
 }
 
     

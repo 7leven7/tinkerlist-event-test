@@ -3,7 +3,7 @@
 namespace App\Repositories\Interfaces;
 
 use App\Models\Event;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface EventRepositoryInterface
 {
@@ -15,6 +15,6 @@ interface EventRepositoryInterface
 
     public function getById($id): Event;
 
-    public function getByDateRange($data): Collection;
-    
+    public function getByDateRange($data): LengthAwarePaginator;
+ 
 }

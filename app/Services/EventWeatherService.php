@@ -16,9 +16,9 @@ class EventWeatherService
         $this->baseUrl = getenv('WEATHER_BASE_URL');
     }
 
-    public function getWeatherForecast(float $latitude, float $longitude, string $date)
+    public function getWeatherForecast(float $latitude, float $longitude)
     {
-        $url = $this->buildUrl($latitude, $longitude, $date);
+        $url = $this->buildUrl($latitude, $longitude);
 
         $response = Http::get($url);
 
@@ -29,7 +29,7 @@ class EventWeatherService
         return $response->json();
     }
 
-    protected function buildUrl(float $latitude, float $longitude, string $date): string
+    protected function buildUrl(float $latitude, float $longitude): string
     {
     
         $queryParams = [
