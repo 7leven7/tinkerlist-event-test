@@ -55,4 +55,14 @@ class EventController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getByDateRange(Request $request) 
+    {
+        try{
+            $events = $this->eventRepository->getByDateRange($request->all());
+            return response()->json($events, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

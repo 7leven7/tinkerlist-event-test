@@ -26,5 +26,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('events/{id}', [EventController::class, 'update']);
     Route::delete('events/{id}', [EventController::class, 'delete']);
     Route::get('events/{id}', [EventController::class, 'getById']);
-
+    Route::get('/events', [EventController::class, 'getByDateRange']);
 });
