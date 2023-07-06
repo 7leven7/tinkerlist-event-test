@@ -40,7 +40,7 @@ class EventController extends Controller
         try {
             $event = $this->eventRepository->getById($id);
             $this->eventRepository->delete($event);
-            return response()->json(null, 204);
+            return response()->json(['success'=> 'Event deleted'], 204);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -61,6 +61,16 @@ class EventController extends Controller
         try{
             $events = $this->eventRepository->getByDateRange($request->all());
             return response()->json($events, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getLocationsByDateInterval(Request $request)
+    {
+        try{
+            $locations = $this->eventRepository->getLocationsByDateInterval($request->all());
+            return response()->json($locations, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

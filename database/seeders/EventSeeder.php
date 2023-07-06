@@ -15,7 +15,7 @@ class EventSeeder extends Seeder
         $events = [];
         $creatorId = 1;
         $locationId = 1;
-
+        
         for ($i = 1; $i <= 30; $i++) {
             $date = date('Y-m-d H:i:s', strtotime('+'. $i .' days'));
 

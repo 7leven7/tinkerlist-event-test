@@ -23,8 +23,9 @@ Route::post('login', [AuthController::class, 'login']);
 Route::group(['middleware' => 'auth'], function () {
     //Event routes
     Route::post('events', [EventController::class, 'create']);
-    Route::put('events/{id}', [EventController::class, 'update']);
-    Route::delete('events/{id}', [EventController::class, 'delete']);
+    Route::put('events/{id}', [EventController::class, 'update'])->middleware('event.authorize');
+    Route::delete('events/{id}', [EventController::class, 'delete'])->middleware('event.authorize');
     Route::get('events/{id}', [EventController::class, 'getById']);
     Route::get('/events', [EventController::class, 'getByDateRange']);
+    Route::get('/locations/events', [EventController::class, 'getLocationsByDateInterval']);
 });

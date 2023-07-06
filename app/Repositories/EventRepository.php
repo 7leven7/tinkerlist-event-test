@@ -11,11 +11,11 @@ use Illuminate\Validation\ValidationException;
 use App\Services\EventMailService;
 use App\Services\EventWeatherService;
 use App\Services\GeocodingService;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use App\Helpers\DateTimeHelper;
 use App\Helpers\PaginationHelper;
 use Illuminate\Pagination\LengthAwarePaginator;
-
+use Carbon\Carbon;
 
 class EventRepository implements EventRepositoryInterface
 {
@@ -188,7 +188,7 @@ class EventRepository implements EventRepositoryInterface
             $currentPage = $data['page'] ?? 1; 
     
             $events = $this->getEventsByDateRange($data['startDate'], $data['endDate']);
-    
+            
             $paginationHelper = new PaginationHelper();
             $paginatedEvents = $paginationHelper->paginate($events, $perPage, $currentPage);
     
@@ -200,6 +200,28 @@ class EventRepository implements EventRepositoryInterface
         }
     }
     
+    public function getLocationsByDateInterval($data): Collection
+    {
+        $events = $this->getEventsByDateRange($data['startDate'], $data['endDate']);
+        $this->attachWeatherData(null, $events);
+
+        $uniqueLocations = $events->groupBy('location')->map(function ($events) {
+            $location = $events->first()->location;
+            $weatherData = $events->sortBy('event_date_time')->map(function ($event) {
+                return $event->weather;
+            });
+
+            return [
+                'location' => [
+                    $location->name
+                ],
+                'weather' => $weatherData
+            ];
+        });
+
+        return $uniqueLocations->values();
+    }
+
     private function getEventsByDateRange(string $startDate, string $endDate): Collection
     {
         return Event::with('location')
@@ -215,20 +237,23 @@ class EventRepository implements EventRepositoryInterface
         if ($events !== null) {
             $eventData = $events;
         }
-    
         foreach ($eventData as $eventItem) {
             $weatherData = $weatherService->getWeatherForecast($eventItem->location->latitude, $eventItem->location->longitude, $eventItem->event_date_time);
             
             foreach ($weatherData['daily'] as $data) {
                 if (DateTimeHelper::unixToDateTime($data['dt'])['date'] == DateTimeHelper::getDateFromTimestamp($eventItem->event_date_time)) {
-                    $eventItem->weather = $data;
+                    $eventItem->weather = [
+                        'precipitation_chance' => $data['pop'] * 100 .'%',
+                        'date_time' => Carbon::createFromTimestamp($data['dt'])->format('Y-m-d H:i:s'),
+                        'temp' => $data['temp'],
+                        'summary' => $data['summary'],
+                        'description' => $data['weather'][0]['description']
+                    ];
                 }
             }
         }
-    
         return ($events !== null) ? $eventData : $event;
     }
-    
     
 }
 
