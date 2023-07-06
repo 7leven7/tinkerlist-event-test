@@ -29,7 +29,7 @@ class EventRepository implements EventRepositoryInterface
                 'country_code' => 'required|string',
                 'invitees' => 'required|array',
                 'invitees.*.name' => 'required|string',
-                'invitees.*.email' => 'required|email', 
+                'invitees.*.email' => 'required|email',
             ]);
 
             if ($validator->fails()) {
@@ -43,10 +43,10 @@ class EventRepository implements EventRepositoryInterface
             $title = $data['title'];
 
             $location = Location::where(['name' => $locationName])->first();
-            
-            if (!$location){
+
+            if (!$location) {
                 $geoService = new GeocodingService();
-                $geoData =  $geoService->getCoordinatesByCityName($locationName,$countryCode);
+                $geoData = $geoService->getCoordinatesByCityName($locationName, $countryCode);
                 $location = Location::create([
                     'name' => $locationName,
                     'longitude' => $geoData[0]['longitude'],
@@ -74,7 +74,7 @@ class EventRepository implements EventRepositoryInterface
                     $mailService->sendInvitationEmail($inviteeData, $title, $dateTime, $locationName);
                 }
             }
-            
+
             return $event;
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), 500);
@@ -100,7 +100,7 @@ class EventRepository implements EventRepositoryInterface
                 $conflictingEvent = Event::where('title', $event->title)
                     ->where('event_date_time', $data['date_time'])
                     ->first();
-    
+
                 if ($conflictingEvent) {
                     throw new \Exception('A conflicting event with the same date and name already exists.');
                 }
@@ -110,7 +110,7 @@ class EventRepository implements EventRepositoryInterface
                 $conflictingEvent = Event::where('event_date_time', $event->event_date_time)
                     ->where('title', $data['title'])
                     ->first();
-    
+
                 if ($conflictingEvent) {
                     throw new \Exception('A conflicting event with the same name and date already exists.');
                 }
@@ -184,22 +184,22 @@ class EventRepository implements EventRepositoryInterface
     public function getByDateRange($data): LengthAwarePaginator
     {
         try {
-            $perPage = $data['perPage'] ?? 10; 
-            $currentPage = $data['page'] ?? 1; 
-    
+            $perPage = $data['perPage'] ?? 10;
+            $currentPage = $data['page'] ?? 1;
+
             $events = $this->getEventsByDateRange($data['startDate'], $data['endDate']);
-            
+
             $paginationHelper = new PaginationHelper();
             $paginatedEvents = $paginationHelper->paginate($events, $perPage, $currentPage);
-    
+
             $paginatedEvents = $this->attachWeatherData(null, $paginatedEvents);
-    
+
             return $paginatedEvents;
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), 500);
         }
     }
-    
+
     public function getLocationsByDateInterval($data): Collection
     {
         $events = $this->getEventsByDateRange($data['startDate'], $data['endDate']);
@@ -228,22 +228,22 @@ class EventRepository implements EventRepositoryInterface
             ->whereBetween('event_date_time', [$startDate, $endDate])
             ->get();
     }
-    
+
     private function attachWeatherData($event, $events = null): mixed
     {
         $weatherService = new EventWeatherService();
         $eventData = [$event];
-    
+
         if ($events !== null) {
             $eventData = $events;
         }
         foreach ($eventData as $eventItem) {
             $weatherData = $weatherService->getWeatherForecast($eventItem->location->latitude, $eventItem->location->longitude, $eventItem->event_date_time);
-            
+
             foreach ($weatherData['daily'] as $data) {
                 if (DateTimeHelper::unixToDateTime($data['dt'])['date'] == DateTimeHelper::getDateFromTimestamp($eventItem->event_date_time)) {
                     $eventItem->weather = [
-                        'precipitation_chance' => $data['pop'] * 100 .'%',
+                        'precipitation_chance' => $data['pop'] * 100 . '%',
                         'date_time' => Carbon::createFromTimestamp($data['dt'])->format('Y-m-d H:i:s'),
                         'temp' => $data['temp'],
                         'summary' => $data['summary'],
@@ -254,8 +254,8 @@ class EventRepository implements EventRepositoryInterface
         }
         return ($events !== null) ? $eventData : $event;
     }
-    
+
 }
 
-    
+
 

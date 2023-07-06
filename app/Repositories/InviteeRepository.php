@@ -42,7 +42,7 @@ class InviteeRepository implements InviteeRepositoryInterface
             }
 
             $invitee->update($data);
-          
+
             return $invitee;
 
         } catch (\Exception $e) {

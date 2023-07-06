@@ -31,7 +31,7 @@ class EventWeatherService
 
     protected function buildUrl(float $latitude, float $longitude): string
     {
-    
+
         $queryParams = [
             'lat' => $latitude,
             'lon' => $longitude,

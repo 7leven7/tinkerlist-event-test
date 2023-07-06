@@ -16,7 +16,6 @@ class Event extends Model
         'creator_id',
     ];
 
-
     public function invitees()
     {
         return $this->belongsToMany(Invitee::class);

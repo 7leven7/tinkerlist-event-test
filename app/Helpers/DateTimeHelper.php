@@ -4,13 +4,13 @@ namespace App\Helpers;
 
 use Carbon\Carbon;
 
-class DateTimeHelper 
+class DateTimeHelper
 {
 
     public static function unixToDateTime($unixTimestamp)
     {
         $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
-        $date = [ 'date' => $carbonDate->toDateString(), 'time' => $carbonDate->toTimeString() ];
+        $date = ['date' => $carbonDate->toDateString(), 'time' => $carbonDate->toTimeString()];
 
         return $date;
     }
@@ -22,7 +22,6 @@ class DateTimeHelper
 
         return $date;
     }
-
 
 }
 

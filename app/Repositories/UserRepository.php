@@ -42,7 +42,7 @@ class UserRepository implements UserRepositoryInterface
 
     public function update(User $user, array $data): User
     {
-        try {           
+        try {
             $validator = Validator::make($data, [
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,

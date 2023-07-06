@@ -20,5 +20,5 @@ interface EventRepositoryInterface
 
     public function getLocationsByDateInterval(array $data): Collection;
 
- 
+
 }

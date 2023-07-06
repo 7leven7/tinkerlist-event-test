@@ -16,7 +16,7 @@ class GeocodingService
         $this->apiUrl = getenv('GEOCODING_NINJA_BASE_URL');
     }
 
-    public function getCoordinatesByCityName($cityName,$countryCode)
+    public function getCoordinatesByCityName($cityName, $countryCode)
     {
         $response = Http::withHeaders([
             'X-Api-Key' => $this->apiKey,
