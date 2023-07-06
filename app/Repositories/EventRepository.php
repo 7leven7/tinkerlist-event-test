@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Location;
 use App\Models\Invitee;
 use App\Repositories\Interfaces\EventRepositoryInterface;
+use Exception;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Services\EventMailService;
@@ -19,7 +20,11 @@ use Carbon\Carbon;
 
 class EventRepository implements EventRepositoryInterface
 {
-
+    /**
+     * @param array $data
+     * @return Event
+     * @throws Exception
+     */
     public function create(array $data): Event
     {
         try {
@@ -76,11 +81,17 @@ class EventRepository implements EventRepositoryInterface
             }
 
             return $event;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), 500);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
         }
     }
 
+    /**
+     * @param Event $event
+     * @param array $data
+     * @return Event
+     * @throws Exception
+     */
     public function update(Event $event, array $data): Event
     {
         try {
@@ -102,7 +113,7 @@ class EventRepository implements EventRepositoryInterface
                     ->first();
 
                 if ($conflictingEvent) {
-                    throw new \Exception('A conflicting event with the same date and name already exists.');
+                    throw new Exception('A conflicting event with the same date and name already exists.');
                 }
             }
 
@@ -112,7 +123,7 @@ class EventRepository implements EventRepositoryInterface
                     ->first();
 
                 if ($conflictingEvent) {
-                    throw new \Exception('A conflicting event with the same name and date already exists.');
+                    throw new Exception('A conflicting event with the same name and date already exists.');
                 }
             }
 
@@ -141,7 +152,7 @@ class EventRepository implements EventRepositoryInterface
                     if (!in_array($invitee->id, $existingInviteeIds)) {
                         $mailService = new EventMailService();
 
-                        $title = isset($data['title']) ? $data['title'] : $event->title;
+                        $title = $data['title'] ?? $event->title;
                         $dateTime = $data['date_time'] ?? $event->event_date_time;
                         $locationName = $data['location'] ?? $event->location->name;
 
@@ -155,32 +166,46 @@ class EventRepository implements EventRepositoryInterface
             }
 
             return $event;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), 500);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
         }
     }
 
+    /**
+     * @param Event $event
+     * @return void
+     * @throws Exception
+     */
     public function delete(Event $event): void
     {
         try {
             $event->invitees()->detach();
             $event->delete();
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), 500);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
         }
     }
 
+    /**
+     * @param $id
+     * @return Event
+     * @throws Exception
+     */
     public function getById($id): Event
     {
         try {
             $event = Event::with('location', 'invitees')->findOrFail($id);
-            $event = $this->attachWeatherData($event);
-            return $event;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), 500);
+            return $this->attachWeatherData($event);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
         }
     }
 
+    /**
+     * @param $data
+     * @return LengthAwarePaginator
+     * @throws Exception
+     */
     public function getByDateRange($data): LengthAwarePaginator
     {
         try {
@@ -192,14 +217,16 @@ class EventRepository implements EventRepositoryInterface
             $paginationHelper = new PaginationHelper();
             $paginatedEvents = $paginationHelper->paginate($events, $perPage, $currentPage);
 
-            $paginatedEvents = $this->attachWeatherData(null, $paginatedEvents);
-
-            return $paginatedEvents;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), 500);
+            return $this->attachWeatherData(null, $paginatedEvents);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage(), 500);
         }
     }
 
+    /**
+     * @param $data
+     * @return Collection
+     */
     public function getLocationsByDateInterval($data): Collection
     {
         $events = $this->getEventsByDateRange($data['startDate'], $data['endDate']);
@@ -222,6 +249,11 @@ class EventRepository implements EventRepositoryInterface
         return $uniqueLocations->values();
     }
 
+    /**
+     * @param string $startDate
+     * @param string $endDate
+     * @return Collection
+     */
     private function getEventsByDateRange(string $startDate, string $endDate): Collection
     {
         return Event::with('location')
@@ -229,6 +261,12 @@ class EventRepository implements EventRepositoryInterface
             ->get();
     }
 
+    /**
+     * @param $event
+     * @param $events
+     * @return mixed
+     * @throws Exception
+     */
     private function attachWeatherData($event, $events = null): mixed
     {
         $weatherService = new EventWeatherService();

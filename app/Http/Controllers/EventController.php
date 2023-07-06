@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\Interfaces\EventRepositoryInterface;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
+    /**
+     * @var EventRepositoryInterface
+     */
     private $eventRepository;
 
     public function __construct(EventRepositoryInterface $eventRepository)
@@ -14,7 +18,11 @@ class EventController extends Controller
         $this->eventRepository = $eventRepository;
     }
 
-    public function create(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function create(Request $request): JsonResponse
     {
         try {
             $event = $this->eventRepository->create($request->all());
@@ -24,7 +32,12 @@ class EventController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    /**
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, $id): JsonResponse
     {
         try {
             $event = $this->eventRepository->getById($id);
@@ -35,7 +48,11 @@ class EventController extends Controller
         }
     }
 
-    public function delete($id)
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
+    public function delete($id): JsonResponse
     {
         try {
             $event = $this->eventRepository->getById($id);
@@ -46,7 +63,11 @@ class EventController extends Controller
         }
     }
 
-    public function getById($id)
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
+    public function getById($id): JsonResponse
     {
         try {
             $event = $this->eventRepository->getById($id);
@@ -56,7 +77,11 @@ class EventController extends Controller
         }
     }
 
-    public function getByDateRange(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getByDateRange(Request $request): JsonResponse
     {
         try {
             $events = $this->eventRepository->getByDateRange($request->all());
@@ -66,7 +91,11 @@ class EventController extends Controller
         }
     }
 
-    public function getLocationsByDateInterval(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getLocationsByDateInterval(Request $request): JsonResponse
     {
         try {
             $locations = $this->eventRepository->getLocationsByDateInterval($request->all());

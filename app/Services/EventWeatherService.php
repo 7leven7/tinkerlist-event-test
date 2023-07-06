@@ -2,13 +2,21 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
 class EventWeatherService
 {
-    protected $apiKey;
-    protected $baseUrl;
+    /**
+     * @var array|false|string
+     */
+    protected string|array|false $apiKey;
+
+    /**
+     * @var string|array|false
+     */
+    protected string|array|false $baseUrl;
 
     public function __construct()
     {
@@ -16,19 +24,30 @@ class EventWeatherService
         $this->baseUrl = getenv('WEATHER_BASE_URL');
     }
 
-    public function getWeatherForecast(float $latitude, float $longitude)
+    /**
+     * @param float $latitude
+     * @param float $longitude
+     * @return array|mixed
+     * @throws Exception
+     */
+    public function getWeatherForecast(float $latitude, float $longitude): mixed
     {
         $url = $this->buildUrl($latitude, $longitude);
 
         $response = Http::get($url);
 
         if ($response->failed()) {
-            throw new \Exception('Failed to retrieve weather data.');
+            throw new Exception('Failed to retrieve weather data.');
         }
 
         return $response->json();
     }
 
+    /**
+     * @param float $latitude
+     * @param float $longitude
+     * @return string
+     */
     protected function buildUrl(float $latitude, float $longitude): string
     {
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    /**
+     * @var UserRepository
+     */
     protected $userRepository;
 
     public function __construct(UserRepository $userRepository)
@@ -18,7 +22,11 @@ class AuthController extends Controller
         $this->userRepository = $userRepository;
     }
 
-    public function register(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function register(Request $request): JsonResponse
     {
         try {
             $user = $this->userRepository->create([
@@ -35,7 +43,11 @@ class AuthController extends Controller
         }
     }
 
-    public function login(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function login(Request $request): JsonResponse
     {
         try {
             $credentials = $request->only('email', 'password');

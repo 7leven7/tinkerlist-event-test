@@ -9,6 +9,9 @@ class Location extends Model
 {
     use HasFactory;
 
+    /**
+     * @var string[]
+     */
     protected $fillable = [
         'name',
         'latitude',

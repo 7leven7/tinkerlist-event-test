@@ -7,8 +7,15 @@ use Illuminate\Support\Facades\Http;
 
 class GeocodingService
 {
-    private $apiKey;
-    private $apiUrl;
+    /**
+     * @var string|array|false
+     */
+    private string|array|false $apiKey;
+
+    /**
+     * @var array|false|string
+     */
+    private string|array|false $apiUrl;
 
     public function __construct()
     {
@@ -16,6 +23,11 @@ class GeocodingService
         $this->apiUrl = getenv('GEOCODING_NINJA_BASE_URL');
     }
 
+    /**
+     * @param $cityName
+     * @param $countryCode
+     * @return array|mixed|string
+     */
     public function getCoordinatesByCityName($cityName, $countryCode)
     {
         $response = Http::withHeaders([

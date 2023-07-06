@@ -7,6 +7,12 @@ use Illuminate\Support\Collection;
 
 class PaginationHelper
 {
+    /**
+     * @param Collection $items
+     * @param int $perPage
+     * @param int $currentPage
+     * @return LengthAwarePaginator
+     */
     public function paginate(Collection $items, int $perPage, int $currentPage): LengthAwarePaginator
     {
         $total = $items->count();

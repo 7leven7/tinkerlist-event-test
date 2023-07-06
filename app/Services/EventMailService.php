@@ -3,9 +3,13 @@
 namespace App\Services;
 
 use Mailgun\Mailgun;
+use Psr\Http\Client\ClientExceptionInterface;
 
 class EventMailService
 {
+    /**
+     * @var Mailgun
+     */
     protected $mailgun;
 
     public function __construct()
@@ -13,7 +17,15 @@ class EventMailService
         $this->mailgun = Mailgun::create(config('mail.mailers.mailgun.secret'));
     }
 
-    public function sendEmail($from, $to, $subject, $body)
+    /**
+     * @param $from
+     * @param $to
+     * @param $subject
+     * @param $body
+     * @return void
+     * @throws ClientExceptionInterface
+     */
+    public function sendEmail($from, $to, $subject, $body): void
     {
         $this->mailgun->messages()->send(config('mail.mailers.mailgun.domain'), [
             'from' => $from,
@@ -23,7 +35,15 @@ class EventMailService
         ]);
     }
 
-    public function sendInvitationEmail(array $inviteeData, string $title, string $dateTime, string $locationName)
+    /**
+     * @param array $inviteeData
+     * @param string $title
+     * @param string $dateTime
+     * @param string $locationName
+     * @return void
+     * @throws ClientExceptionInterface
+     */
+    public function sendInvitationEmail(array $inviteeData, string $title, string $dateTime, string $locationName): void
     {
         $from = auth()->user()->email;
         $to = $inviteeData['email'];

@@ -7,7 +7,11 @@ use Carbon\Carbon;
 class DateTimeHelper
 {
 
-    public static function unixToDateTime($unixTimestamp)
+    /**
+     * @param $unixTimestamp
+     * @return array
+     */
+    public static function unixToDateTime($unixTimestamp): array
     {
         $carbonDate = Carbon::createFromTimestamp($unixTimestamp);
         $date = ['date' => $carbonDate->toDateString(), 'time' => $carbonDate->toTimeString()];
@@ -15,12 +19,14 @@ class DateTimeHelper
         return $date;
     }
 
-    public static function getDateFromTimestamp($dateTime)
+    /**
+     * @param $dateTime
+     * @return string
+     */
+    public static function getDateFromTimestamp($dateTime): string
     {
         $carbonDate = Carbon::parse($dateTime);
-        $date = $carbonDate->toDateString();
-
-        return $date;
+        return $carbonDate->toDateString();
     }
 
 }

@@ -3,11 +3,17 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use Exception;
 use Illuminate\Validation\ValidationException;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 
 class UserRepository implements UserRepositoryInterface
 {
+    /**
+     * @param array $data
+     * @return User
+     * @throws Exception
+     */
     public function create(array $data): User
     {
         try {
@@ -26,20 +32,17 @@ class UserRepository implements UserRepositoryInterface
                 'email' => $data['email'],
                 'password' => bcrypt($data['password']),
             ]);
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to create user.', 500, $e);
+        } catch (Exception $e) {
+            throw new Exception('Failed to create user.', 500, $e);
         }
     }
 
-    public function findByEmail(string $email): User
-    {
-        try {
-            return User::where('email', $email)->first();
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to find user by email.', 500, $e);
-        }
-    }
-
+    /**
+     * @param User $user
+     * @param array $data
+     * @return User
+     * @throws Exception
+     */
     public function update(User $user, array $data): User
     {
         try {
@@ -56,28 +59,37 @@ class UserRepository implements UserRepositoryInterface
             $user->update($data);
 
             return $user;
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to update user.', 500, $e);
+        } catch (Exception $e) {
+            throw new Exception('Failed to update user.', 500, $e);
 
         }
     }
 
+    /**
+     * @param User $user
+     * @return void
+     * @throws Exception
+     */
     public function delete(User $user): void
     {
         try {
             $user->delete();
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to delete user.', 500, $e);
+        } catch (Exception $e) {
+            throw new Exception('Failed to delete user.', 500, $e);
         }
     }
 
+    /**
+     * @param $id
+     * @return User
+     * @throws Exception
+     */
     public function getById($id): User
     {
         try {
-            $user = User::findOrFail($id);
-            return $user;
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to find user by id.', 500, $e);
+            return User::findOrFail($id);
+        } catch (Exception $e) {
+            throw new Exception('Failed to find user by id.', 500, $e);
 
         }
     }
