@@ -1,18 +1,18 @@
 ## tinkerlist-event-test
 
-Instead of using Call API 1.0, I decided to use Call API 3.0 just to get weather information based on event location. This API version provides accurate and relevant weather information for a certain location, ensuring the accuracy and relevance of weather data for a certain location.
+Instead of using one Call API 1.0, I decided to use one Call API 3.0 just to get weather information based on event location. This API version provides accurate and relevant weather information for a certain location, ensuring the accuracy and relevance of weather data for a certain location.
 
-I chose to apply the Geocoding function of the API-Ninja platform (https://api-ninjas.com) to get accurate location information such as longitude and latitude. The reason for this choice is that I could not find enough answers with the necessary attributes to display when using only the city name. This additional service allows us to obtain the necessary information for the problem.
+I chose to apply the Geocoding function of the API-Ninja platform (https://api-ninjas.com) to get accurate location information such as longitude and latitude. The reason for this choice is that I could not find response with the necessary attributes to display when using only the city name. This additional service allows us to obtain the necessary information for the problem.
 
 I have integrated the Mailgun service to manage email sending functionality.
 
-Authentication is done using the JSON Web Tokens (JWT) mechanism.  By incorporating JWT authentication, the solution ensures that only trusted users can access the network, increasing security and protecting sensitive data.
+Authentication is done using the JSON Web Tokens (JWT) mechanism.  By incorporating JWT authentication, the solution ensures that only registered users can access, increasing security and protecting sensitive data.
 
-The solution follows repository design patterns to maintain a clean and structured code base. This pattern separates data entry logic from business logic, modularity, and code reuse. Following this pattern, the codebase is organized and maintainable, facilitating improvements and future updates.
+The solution follows repository design pattern to maintain a clean and structured code base. This pattern separates data entry logic from business logic, modularity, and code reuse. Following this pattern, the codebase is organized and maintainable, facilitating improvements and future updates.
 
 The solution uses Docker for a consistent and scalable development environment. Docker allows you to create an isolated and lightweight container that contains all the necessary dependencies and configurations. By using Docker, the solution ensures that the development environment is consistent across different systems, reducing potential problems related to environment inconsistencies.
 
-In summary, the solution includes Call API 3.0 integration with the Geocoding functionality of the API-Ninja platform, implementing JWT authentication, following repository design patterns for a clean and maintainable code language, and using Docker for a consistent and scalable development environment.
+In summary, the solution includes one Call API 3.0 integration with the Geocoding functionality of the API-Ninja platform, implementing JWT authentication, following repository design patterns for a clean and maintainable code, and using Docker for a consistent and scalable development environment.
 
 
 ## Setup project localy
